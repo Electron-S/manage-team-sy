@@ -698,8 +698,8 @@ const History = {
   },
 };
 
-function undo() { History.undo(); }
-function redo() { History.redo(); }
+function undo() { if (!isAdmin()) return; History.undo(); }
+function redo() { if (!isAdmin()) return; History.redo(); }
 
 // ═══════════════════════════════════════
 // PAGE SWITCHING
@@ -1191,6 +1191,7 @@ function renderManage() {
 // ADD / DELETE
 // ═══════════════════════════════════════
 function openAdd() {
+  if (!isAdmin()) return;
   ['add-name','add-note','add-v25'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('add-exempt').checked = false;
   document.getElementById('addModal').style.display='flex';
@@ -1212,6 +1213,7 @@ function confirmAdd() {
 }
 
 function openDelete(name) {
+  if (!isAdmin()) return;
   S.pendingDelete=name;
   document.getElementById('del-name').textContent=name;
   document.getElementById('delModal').style.display='flex';
@@ -1540,7 +1542,7 @@ function downloadBlob(blob, filename) {
 // ═══════════════════════════════════════
 // 관리자 모드
 // ═══════════════════════════════════════
-const ADMIN_PW = 'sy2026!';
+const ADMIN_PW_HASH = '46de1b41d1dcf8723cf9f6d8a98a25db8bfe88565a5c3a2a8f6efe323eb58be8';
 const ADMIN_KEY = 'wm_admin_v1';
 const TOKEN_KEY = 'wm_gh_token_v1';
 const GITHUB_REPO = 'Electron-S/manage-team-sy';
@@ -1591,9 +1593,12 @@ function closeAdminModal() {
   document.getElementById('adminModal').style.display = 'none';
 }
 
-function confirmAdminLogin() {
+async function confirmAdminLogin() {
   const pw = document.getElementById('adminPwInput').value;
-  if (pw !== ADMIN_PW) {
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest('SHA-256', enc.encode(pw));
+  const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  if (hex !== ADMIN_PW_HASH) {
     document.getElementById('adminPwError').style.display = 'block';
     document.getElementById('adminPwInput').value = '';
     document.getElementById('adminPwInput').focus();
