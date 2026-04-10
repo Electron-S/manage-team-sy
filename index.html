@@ -1573,14 +1573,14 @@ function updateAdminUI() {
 
 function openAdminModal() {
   if (isAdmin()) {
-    document.getElementById('adminPanel').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'block';
     document.getElementById('adminLogin').style.display = 'none';
     const tok = localStorage.getItem(TOKEN_KEY);
     const td = document.getElementById('tokenDisplay');
     td.textContent = tok ? tok.slice(0,8) + '••••••••••••••••••••••••••••••••' : '(미설정)';
     td.style.color = tok ? 'var(--grn)' : 'var(--red)';
   } else {
-    document.getElementById('adminLogin').style.display = 'flex';
+    document.getElementById('adminLogin').style.display = 'block';
     document.getElementById('adminPanel').style.display = 'none';
     setTimeout(() => document.getElementById('adminPwInput').focus(), 80);
   }
