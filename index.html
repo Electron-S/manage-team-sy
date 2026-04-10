@@ -1347,8 +1347,8 @@ function exportJSON() {
     version: '1.0',
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json;charset=utf-8;'});
-  downloadBlob(blob, '근무일정_백업_' + dateStamp() + '.json');
-  toast('✓ JSON 백업 파일 다운로드 완료');
+  downloadBlob(blob, 'data.json');
+  toast('✓ data.json 다운로드 완료 — GitHub에 업로드하면 팀원들에게 반영됩니다');
 }
 
 // ── CSV 내보내기 ──
@@ -1487,18 +1487,32 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════
-// INIT — localStorage 복원 후 렌더링
+// INIT — HTTP이면 data.json 우선 로드, 아니면 localStorage 복원
 // ═══════════════════════════════════════
-const savedAt = loadFromLocalStorage();
-if (savedAt) {
-  const dt = new Date(savedAt);
-  const fmt = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-  document.getElementById('savedBadge').textContent = `✓ 복원됨 (${fmt})`;
-  document.getElementById('savedBadge').style.opacity = '1';
-  setTimeout(() => document.getElementById('savedBadge').style.opacity = '0', 3000);
-}
-History.updateButtons();
-renderOverview();
+(async () => {
+  if (location.protocol.startsWith('http')) {
+    try {
+      const res = await fetch('data.json?t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        applyImportedData(data);
+        History.updateButtons();
+        renderOverview();
+        return;
+      }
+    } catch(e) {}
+  }
+  const savedAt = loadFromLocalStorage();
+  if (savedAt) {
+    const dt = new Date(savedAt);
+    const fmt = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('savedBadge').textContent = `✓ 복원됨 (${fmt})`;
+    document.getElementById('savedBadge').style.opacity = '1';
+    setTimeout(() => document.getElementById('savedBadge').style.opacity = '0', 3000);
+  }
+  History.updateButtons();
+  renderOverview();
+})();
 </script>
 </body>
 </html>
