@@ -323,7 +323,7 @@ tr.exempt-tr td.nc { color: var(--muted) !important; text-decoration: line-throu
       <span style="font-size:10px;color:var(--muted);">이름·메모·2025년 휴가 클릭 수정 가능</span>
     </div>
     <div class="tbl-wrap"><table><thead><tr>
-      <th>#</th><th>이름</th><th>현재월 비고</th><th>26년 휴가</th><th>주말 근무율</th><th>25년 휴가</th><th>주말근무</th><th>액션</th>
+      <th>#</th><th>이름</th><th>현재월 비고</th><th>선택연도 휴가</th><th>주말 근무율</th><th>25년 휴가</th><th>주말근무</th><th>액션</th>
     </tr></thead><tbody id="mg-tbody"></tbody></table></div>
   </div>
 </div>
@@ -527,16 +527,18 @@ const S = {
     },
   },
 
-  annual2026: {
-    '남현정':{1:0,2:1,3:0,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '진영옥':{1:0,2:0.25,3:0,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '정희진':{1:0,2:3,3:1,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '정혜라':{1:0,2:2,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '신선경':{1:0,2:0.5,3:0,4:2.25,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '김혜원':{1:0,2:1.5,3:1,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '방지영':{1:0.5,2:1.25,3:0.5,4:2.25,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '길복주':{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
-    '김민혁':{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+  annualByYear: {
+    '2026': {
+      '남현정':{1:0,2:1,3:0,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '진영옥':{1:0,2:0.25,3:0,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '정희진':{1:0,2:3,3:1,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '정혜라':{1:0,2:2,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '신선경':{1:0,2:0.5,3:0,4:2.25,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '김혜원':{1:0,2:1.5,3:1,4:2,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '방지영':{1:0.5,2:1.25,3:0.5,4:2.25,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '길복주':{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+      '김민혁':{1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0},
+    },
   },
 
   annual2025: {
@@ -586,9 +588,10 @@ const S = {
     if (!this.weekend[name]) this.weekend[name] = {dates:{}};
     return this.weekend[name];
   },
-  getA(name) {
-    if (!this.annual2026[name]) this.annual2026[name]={1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0};
-    return this.annual2026[name];
+  getA(year, name) {
+    if (!this.annualByYear[year]) this.annualByYear[year] = {};
+    if (!this.annualByYear[year][name]) this.annualByYear[year][name]={1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0};
+    return this.annualByYear[year][name];
   },
   wkCount(name) {
     return Object.values(this.getW(name).dates).reduce((s,v)=>s+(v==='종일'?1:v==='반일'?0.5:0),0);
@@ -606,7 +609,7 @@ const S = {
     this.annual2025[name] = v25 || 0;
     this.weekend[name] = {dates:{}};
     this.monthKeys.forEach(mk => this.getM(mk, name));
-    this.getA(name);
+    [...new Set(this.monthKeys.map(mk => mk.split('.')[0]))].forEach(year => this.getA(year, name));
     if (note) this.getM(this.currentMonth, name).note = note;
     return true;
   },
@@ -614,7 +617,9 @@ const S = {
   removePerson(name) {
     this.persons = this.persons.filter(n=>n!==name);
     delete this.weekend[name];
-    delete this.annual2026[name];
+    Object.keys(this.annualByYear).forEach(year => {
+      if (this.annualByYear[year]) delete this.annualByYear[year][name];
+    });
     delete this.annual2025[name];
     this.weekendExempt.delete(name);
     this.monthKeys.forEach(mk => { if(this.monthly[mk]) delete this.monthly[mk][name]; });
@@ -639,7 +644,7 @@ const History = {
       monthLabels:   S.monthLabels,
       persons:       S.persons,
       monthly:       S.monthly,
-      annual2026:    S.annual2026,
+      annualByYear:  S.annualByYear,
       annual2025:    S.annual2025,
       weekend:       S.weekend,
       weekendExempt: [...S.weekendExempt],
@@ -764,6 +769,14 @@ function monthLabel(mk) {
   return S.monthLabels[mk] || mk;
 }
 
+function yearFromMonthKey(mk) {
+  return String(mk).split('.')[0];
+}
+
+function currentYear() {
+  return yearFromMonthKey(S.currentMonth);
+}
+
 function compareMonthKey(a, b) {
   const [ay, am] = String(a).split('.').map(Number);
   const [by, bm] = String(b).split('.').map(Number);
@@ -776,12 +789,14 @@ function ensureMonthStructures() {
   S.monthKeys = [...mergedKeys].sort(compareMonthKey);
   if (!S.monthLabels) S.monthLabels = {};
   S.monthKeys.forEach(mk => {
-    const [year, month] = mk.split('.');
+    const year = yearFromMonthKey(mk);
+    const [, month] = mk.split('.');
     if (!S.monthLabels[mk] && year && month) {
       S.monthLabels[mk] = `${year}년 ${Number(month)}월`;
     }
     if (!S.monthly[mk]) S.monthly[mk] = {};
     S.allPersons.forEach(name => S.getM(mk, name));
+    S.allPersons.filter(name => S.persons.includes(name)).forEach(name => S.getA(year, name));
   });
   if (!S.monthKeys.includes(S.currentMonth)) {
     S.currentMonth = S.monthKeys[S.monthKeys.length - 1] || S.currentMonth;
@@ -1120,8 +1135,11 @@ function renderAnnual() {
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const all=S.persons;
 
-  const totals=months.map(m=>all.reduce((s,n)=>s+(S.getA(n)[m]||0),0));
+  const year = currentYear();
+  const totals=months.map(m=>all.reduce((s,n)=>s+(S.getA(year, n)[m]||0),0));
   const maxT=Math.max(...totals,0.1);
+  document.querySelector('#page-annual .card-hdr .card-title').textContent = `📈 ${year}년 월별 휴가 추이 (전체 합산)`;
+  document.querySelectorAll('#page-annual .card-hdr .card-title')[1].textContent = `📋 ${year}년 직원별 월별 휴가`;
   document.getElementById('an-trend').innerHTML=totals.map((v,i)=>{
     const pct=(v/maxT)*100;
     const c=v>5?'var(--red)':v>2?'var(--ylw)':v>0?'var(--acc)':'var(--s2)';
@@ -1139,7 +1157,7 @@ function renderAnnual() {
   const tbody=document.getElementById('an-tbody');
   tbody.innerHTML='';
   all.forEach(name=>{
-    const a=S.getA(name);
+    const a=S.getA(year, name);
     const total=months.reduce((s,m)=>s+(a[m]||0),0);
     const tr=document.createElement('tr');
     let cells=`<td class="nc">${name}</td>`;
@@ -1178,7 +1196,7 @@ function renderPersons() {
   const mk=S.currentMonth;
   document.getElementById('pg-grid').innerHTML = S.allPersons.map(name=>{
     const m=S.getM(mk,name);
-    const a=S.annual2026[name];
+  const a=S.getA(currentYear(), name);
     const aTotal=a?Object.values(a).reduce((s,v)=>s+v,0):0;
     const a25=S.annual2025[name]||0;
     const exempt=S.isExempt(name);
@@ -1193,7 +1211,7 @@ function renderPersons() {
       <div class="pc-name">${name} ${rateDisp}</div>
       <div class="pc-stats">
         <div><div class="pc-sv" style="color:var(--ylw);">${m.vacation||'—'}</div><div class="pc-sl">이달휴가</div></div>
-        <div><div class="pc-sv" style="color:var(--acc);">${aTotal.toFixed(1)}</div><div class="pc-sl">26년합계</div></div>
+        <div><div class="pc-sv" style="color:var(--acc);">${aTotal.toFixed(1)}</div><div class="pc-sl">${currentYear().slice(2)}년합계</div></div>
         <div><div class="pc-sv" style="color:${exempt?'var(--muted)':'var(--cyn)'};">${exempt?'—':cnt}</div><div class="pc-sl">주말근무</div></div>
         <div><div class="pc-sv" style="color:var(--grn);">${a25}</div><div class="pc-sl">25년합계</div></div>
       </div>
@@ -1210,7 +1228,7 @@ function renderManage() {
   const tbody=document.getElementById('mg-tbody');
   tbody.innerHTML='';
   S.allPersons.forEach((name,i)=>{
-    const a=S.annual2026[name];
+    const a=S.getA(currentYear(), name);
     const aTotal=a?Object.values(a).reduce((s,v)=>s+v,0):0;
     const rate=S.wkRate(name);
     const exempt=S.isExempt(name);
@@ -1241,7 +1259,12 @@ function renderManage() {
       S.monthKeys.forEach(mk2=>{
         if(S.monthly[mk2]&&S.monthly[mk2][name]){S.monthly[mk2][newName]=S.monthly[mk2][name];delete S.monthly[mk2][name];}
       });
-      if(S.annual2026[name]){S.annual2026[newName]=S.annual2026[name];delete S.annual2026[name];}
+      Object.keys(S.annualByYear).forEach(year => {
+        if (S.annualByYear[year] && S.annualByYear[year][name]) {
+          S.annualByYear[year][newName] = S.annualByYear[year][name];
+          delete S.annualByYear[year][name];
+        }
+      });
       if(S.annual2025[name]!==undefined){S.annual2025[newName]=S.annual2025[name];delete S.annual2025[name];}
       if(S.weekend[name]){S.weekend[newName]=S.weekend[name];delete S.weekend[name];}
       if(S.weekendExempt.has(name)){S.weekendExempt.delete(name);S.weekendExempt.add(newName);}
@@ -1309,7 +1332,7 @@ function saveToLocalStorage() {
       monthLabels: S.monthLabels,
       persons: S.persons,
       monthly: S.monthly,
-      annual2026: S.annual2026,
+      annualByYear: S.annualByYear,
       annual2025: S.annual2025,
       weekend: S.weekend,
       weekendExempt: [...S.weekendExempt],
@@ -1336,7 +1359,8 @@ function applyImportedData(data) {
   if (data.monthLabels)  S.monthLabels = data.monthLabels;
   if (data.persons)      S.persons      = data.persons;
   if (data.monthly)      S.monthly      = data.monthly;
-  if (data.annual2026)   S.annual2026   = data.annual2026;
+  if (data.annualByYear) S.annualByYear = data.annualByYear;
+  else if (data.annual2026) S.annualByYear = {'2026': data.annual2026};
   if (data.annual2025)   S.annual2025   = data.annual2025;
   if (data.weekend)      S.weekend      = data.weekend;
   S.weekendExempt = data.weekendExempt ? new Set(data.weekendExempt) : new Set();
@@ -1417,8 +1441,8 @@ async function saveAsHTML() {
   // monthLabels 객체 교체
   newHTML = replaceDataBlock(newHTML, 'monthLabels', JSON.stringify(S.monthLabels));
 
-  // annual2026 교체
-  newHTML = replaceDataBlock(newHTML, 'annual2026', JSON.stringify(S.annual2026));
+  // annualByYear 교체
+  newHTML = replaceDataBlock(newHTML, 'annualByYear', JSON.stringify(S.annualByYear));
 
   // annual2025 교체
   newHTML = replaceDataBlock(newHTML, 'annual2025', JSON.stringify(S.annual2025));
@@ -1491,7 +1515,7 @@ function exportJSON() {
     monthLabels: S.monthLabels,
     persons: S.persons,
     monthly: S.monthly,
-    annual2026: S.annual2026,
+    annualByYear: S.annualByYear,
     annual2025: S.annual2025,
     weekend: S.weekend,
     weekendExempt: [...S.weekendExempt],
@@ -1545,17 +1569,20 @@ function doXLSX() {
   ws1['!cols'] = [{wch:10},{wch:8},{wch:12},{wch:8},{wch:6},{wch:8},{wch:30}];
   XLSX.utils.book_append_sheet(wb, ws1, '월별근태');
 
-  // 시트 2: 2026 연간
+  // 시트 2+: 연도별 연간
   const months = [1,2,3,4,5,6,7,8,9,10,11,12];
-  const annualData = [['이름','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월','합계']];
-  S.persons.forEach(name => {
-    const a = S.getA(name);
-    const total = months.reduce((s,m)=>s+(a[m]||0),0);
-    annualData.push([name, ...months.map(m=>a[m]||0), total]);
+  const annualYears = [...new Set(S.monthKeys.map(mk => yearFromMonthKey(mk)))].sort();
+  annualYears.forEach(year => {
+    const annualData = [['이름','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월','합계']];
+    S.persons.forEach(name => {
+      const a = S.getA(year, name);
+      const total = months.reduce((s,m)=>s+(a[m]||0),0);
+      annualData.push([name, ...months.map(m=>a[m]||0), total]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(annualData);
+    ws['!cols'] = [{wch:10},...Array(13).fill({wch:6})];
+    XLSX.utils.book_append_sheet(wb, ws, `${year}연간`);
   });
-  const ws2 = XLSX.utils.aoa_to_sheet(annualData);
-  ws2['!cols'] = [{wch:10},...Array(13).fill({wch:6})];
-  XLSX.utils.book_append_sheet(wb, ws2, '2026연간');
 
   // 시트 3: 주말 근무
   const wkDates = S.weekendDates;
@@ -1573,9 +1600,9 @@ function doXLSX() {
   XLSX.utils.book_append_sheet(wb, ws3, '주말근무');
 
   // 시트 4: 직원목록
-  const mgData = [['이름','주말근무','2026합계','2025합계']];
+  const mgData = [['이름','주말근무',`${currentYear()}합계`,'2025합계']];
   S.allPersons.forEach(name => {
-    const a=S.annual2026[name];
+    const a=S.getA(currentYear(), name);
     const total=a?Object.values(a).reduce((s,v)=>s+v,0):0;
     mgData.push([name, S.isExempt(name)?'예외':'배정', total, S.annual2025[name]||0]);
   });
@@ -1751,7 +1778,7 @@ async function pushToGitHub() {
       monthLabels: S.monthLabels,
       persons: S.persons,
       monthly: S.monthly,
-      annual2026: S.annual2026,
+      annualByYear: S.annualByYear,
       annual2025: S.annual2025,
       weekend: S.weekend,
       weekendExempt: [...S.weekendExempt],
