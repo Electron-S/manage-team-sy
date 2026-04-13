@@ -4,13 +4,15 @@
     "2026.01",
     "2026.02",
     "2026.03",
-    "2026.04"
+    "2026.04",
+    "2026.05"
   ],
   "monthLabels": {
     "2026.01": "2026년 1월",
     "2026.02": "2026년 2월",
     "2026.03": "2026년 3월",
-    "2026.04": "2026년 4월"
+    "2026.04": "2026년 4월",
+    "2026.05": "2026년 5월"
   },
   "persons": [
     "남현정",
@@ -24,13 +26,13 @@
   "monthly": {
     "2026.04": {
       "남현정": {
-        "vacation": 2,
+        "vacation": 1,
         "overtime": 0,
         "weekend": 0,
         "note": "휴가 3/30,31"
       },
       "진영옥": {
-        "vacation": 2,
+        "vacation": 1,
         "overtime": 0,
         "weekend": 0,
         "note": "휴가 3/30,31"
@@ -45,22 +47,22 @@
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "4/15대체휴무"
       },
       "신선경": {
-        "vacation": 2.25,
+        "vacation": 1.25,
         "overtime": 0,
         "weekend": 0,
         "note": "반반차 3/27, 휴가 3/30,31"
       },
       "김혜원": {
-        "vacation": 2,
+        "vacation": 1,
         "overtime": 0,
         "weekend": 0,
         "note": "휴가 3/30,31"
       },
       "방지영": {
-        "vacation": 2.25,
+        "vacation": 1.25,
         "overtime": 0,
         "weekend": 0,
         "note": "휴가 3/30,31 / 4/8 반반차"
@@ -250,6 +252,68 @@
         "overtime": 0,
         "weekend": 0,
         "note": "1/15 반차"
+      },
+      "박희석": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "김신영": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "진수연": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      }
+    },
+    "2026.05": {
+      "남현정": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "진영옥": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "정희진": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "정혜라": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "신선경": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "김혜원": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
+      },
+      "방지영": {
+        "vacation": 0,
+        "overtime": 0,
+        "weekend": 0,
+        "note": ""
       },
       "박희석": {
         "vacation": 0,
@@ -545,6 +609,6 @@
     "남현정",
     "진영옥"
   ],
-  "savedAt": "2026-04-13T01:57:47.583Z",
+  "savedAt": "2026-04-13T01:58:17.219Z",
   "version": "1.0"
 }
