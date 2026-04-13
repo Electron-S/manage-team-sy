@@ -270,7 +270,7 @@ tr.exempt-tr td.nc { color: var(--muted) !important; text-decoration: line-throu
       <span class="card-title">📅 주말 근무 히트맵</span>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:10px;color:var(--muted);">셀 클릭 → 순환 전환 (휴무 → 종일 → 반일) &nbsp;|&nbsp; <span style="color:#f59e0b;">⚠ 예외 인원은 배정 제외</span></span>
-        <button class="btn-add admin-only" onclick="openAddMonth()">+ 월 추가</button>
+        <button class="btn-add admin-only" onclick="openAddWeekendDate()">+ 근무일 추가</button>
       </div>
     </div>
     <div class="card-body"><div class="hm-wrap" id="wk-heatmap"></div></div>
@@ -599,7 +599,10 @@ const S = {
   wkCount(name) {
     return Object.values(this.getW(name).dates).reduce((s,v)=>s+(v==='종일'?1:v==='반일'?0.5:0),0);
   },
-  wkRate(name) { return this.wkCount(name) / 24; },
+  wkRate(name) {
+    const base = (this.weekendDates || []).length || 1;
+    return this.wkCount(name) / base;
+  },
   isExempt(name) { return this.weekendExempt.has(name); },
   toggleExempt(name) {
     if (this.weekendExempt.has(name)) this.weekendExempt.delete(name);
@@ -650,6 +653,7 @@ const History = {
       annualByYear:  S.annualByYear,
       annual2025:    S.annual2025,
       weekend:       S.weekend,
+      weekendDates:  S.weekendDates,
       weekendExempt: [...S.weekendExempt],
     }));
   },
@@ -780,6 +784,10 @@ function currentYear() {
   return yearFromMonthKey(S.currentMonth);
 }
 
+function compareDateKey(a, b) {
+  return String(a).localeCompare(String(b));
+}
+
 function compareMonthKey(a, b) {
   const [ay, am] = String(a).split('.').map(Number);
   const [by, bm] = String(b).split('.').map(Number);
@@ -804,6 +812,10 @@ function ensureMonthStructures() {
   if (!S.monthKeys.includes(S.currentMonth)) {
     S.currentMonth = S.monthKeys[S.monthKeys.length - 1] || S.currentMonth;
   }
+}
+
+function ensureWeekendDates() {
+  S.weekendDates = [...new Set(S.weekendDates || [])].sort(compareDateKey);
 }
 
 // ═══════════════════════════════════════
@@ -1013,6 +1025,7 @@ function openAddMonth() {
 // WEEKEND
 // ═══════════════════════════════════════
 function renderWeekend() {
+  ensureWeekendDates();
   const dates = S.weekendDates;
   const all = S.allPersons;
   const active = all.filter(n=>!S.isExempt(n));
@@ -1123,6 +1136,28 @@ function cycleWk(name, date) {
   else delete d.dates[date];
   renderWeekend();
   notifySaved();
+}
+
+function openAddWeekendDate() {
+  if (!isAdmin()) return;
+  ensureWeekendDates();
+  const input = prompt('추가할 근무일을 입력하세요. 예: 2026-05-05');
+  if (!input) return;
+  const date = input.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    toast('❌ 날짜 형식은 YYYY-MM-DD 이어야 합니다.');
+    return;
+  }
+  if (S.weekendDates.includes(date)) {
+    toast('이미 등록된 근무일입니다.');
+    return;
+  }
+  History.push();
+  S.weekendDates.push(date);
+  ensureWeekendDates();
+  renderWeekend();
+  notifySaved();
+  toast(`✓ ${date} 근무일 추가됨`);
 }
 
 function toggleExempt(name) {
@@ -1337,6 +1372,7 @@ const LS_KEY = 'wm_dashboard_v1';
 function saveToLocalStorage() {
   try {
     ensureMonthStructures();
+    ensureWeekendDates();
     const data = {
       currentMonth: S.currentMonth,
       monthKeys: S.monthKeys,
@@ -1346,6 +1382,7 @@ function saveToLocalStorage() {
       annualByYear: S.annualByYear,
       annual2025: S.annual2025,
       weekend: S.weekend,
+      weekendDates: S.weekendDates,
       weekendExempt: [...S.weekendExempt],
       savedAt: new Date().toISOString(),
     };
@@ -1374,8 +1411,10 @@ function applyImportedData(data) {
   else if (data.annual2026) S.annualByYear = {'2026': data.annual2026};
   if (data.annual2025)   S.annual2025   = data.annual2025;
   if (data.weekend)      S.weekend      = data.weekend;
+  if (data.weekendDates) S.weekendDates = data.weekendDates;
   S.weekendExempt = data.weekendExempt ? new Set(data.weekendExempt) : new Set();
   ensureMonthStructures();
+  ensureWeekendDates();
 }
 
 function clearLocalStorage() {
@@ -1418,6 +1457,7 @@ function closeExportModal() { document.getElementById('exportModal').style.displ
 async function saveAsHTML() {
   toast('⏳ HTML 생성 중...');
   ensureMonthStructures();
+  ensureWeekendDates();
 
   // 원본 소스를 fetch로 가져옴 (outerHTML은 DOM 파싱으로 변형될 수 있음)
   let originalHTML;
@@ -1460,6 +1500,9 @@ async function saveAsHTML() {
 
   // weekend 교체
   newHTML = replaceDataBlock(newHTML, 'weekend', JSON.stringify(S.weekend));
+
+  // weekendDates 교체
+  newHTML = replaceDataBlock(newHTML, 'weekendDates', JSON.stringify(S.weekendDates));
 
   // 파일명: 날짜+시간
   const now = new Date();
@@ -1520,6 +1563,7 @@ function replaceDataBlock(html, key, newValueStr) {
 // ── JSON 내보내기 ──
 function exportJSON() {
   ensureMonthStructures();
+  ensureWeekendDates();
   const data = {
     currentMonth: S.currentMonth,
     monthKeys: S.monthKeys,
@@ -1529,6 +1573,7 @@ function exportJSON() {
     annualByYear: S.annualByYear,
     annual2025: S.annual2025,
     weekend: S.weekend,
+    weekendDates: S.weekendDates,
     weekendExempt: [...S.weekendExempt],
     savedAt: new Date().toISOString(),
     version: '1.0',
@@ -1783,6 +1828,7 @@ async function pushToGitHub() {
 
   try {
     ensureMonthStructures();
+    ensureWeekendDates();
     const data = {
       currentMonth: S.currentMonth,
       monthKeys: S.monthKeys,
@@ -1792,6 +1838,7 @@ async function pushToGitHub() {
       annualByYear: S.annualByYear,
       annual2025: S.annual2025,
       weekend: S.weekend,
+      weekendDates: S.weekendDates,
       weekendExempt: [...S.weekendExempt],
       savedAt: new Date().toISOString(),
       version: '1.0',
