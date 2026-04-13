@@ -794,7 +794,27 @@ function compareMonthKey(a, b) {
   return (ay - by) || (am - bm);
 }
 
+function sanitizeRosterData() {
+  const personSet = new Set(S.persons || []);
+  Object.keys(S.monthly || {}).forEach(mk => {
+    const rows = S.monthly[mk] || {};
+    Object.keys(rows).forEach(name => {
+      if (!personSet.has(name)) delete rows[name];
+    });
+  });
+  Object.keys(S.annualByYear || {}).forEach(year => {
+    const rows = S.annualByYear[year] || {};
+    Object.keys(rows).forEach(name => {
+      if (!personSet.has(name)) delete rows[name];
+    });
+  });
+  Object.keys(S.annual2025 || {}).forEach(name => {
+    if (!personSet.has(name)) delete S.annual2025[name];
+  });
+}
+
 function ensureMonthStructures() {
+  sanitizeRosterData();
   const monthlyKeys = Object.keys(S.monthly || {});
   const mergedKeys = new Set([...(S.monthKeys || []), ...monthlyKeys]);
   S.monthKeys = [...mergedKeys].sort(compareMonthKey);
