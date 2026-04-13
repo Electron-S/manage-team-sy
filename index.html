@@ -977,16 +977,18 @@ function setMonth(mk) {
 
 function openAddMonth() {
   if (!isAdmin()) return;
-  const input = prompt('추가할 월을 입력하세요. 예: 2026.05');
-  if (!input) return;
-  const mk = input.trim();
-  if (!/^\d{4}\.(0[1-9]|1[0-2])$/.test(mk)) {
-    toast('❌ 월 형식은 YYYY.MM 이어야 합니다.');
-    return;
-  }
+  ensureMonthStructures();
+  const latestMonth = [...S.monthKeys].sort(compareMonthKey).at(-1);
+  if (!latestMonth) return;
+  const [yearStr, monthStr] = latestMonth.split('.');
+  const latestYear = Number(yearStr);
+  const latestMonthNum = Number(monthStr);
+  const nextYear = latestMonthNum === 12 ? latestYear + 1 : latestYear;
+  const nextMonthNum = latestMonthNum === 12 ? 1 : latestMonthNum + 1;
+  const mk = `${nextYear}.${String(nextMonthNum).padStart(2,'0')}`;
   if (S.monthKeys.includes(mk)) {
     setMonth(mk);
-    toast('이미 등록된 월입니다.');
+    toast(`${monthLabel(mk)}이 이미 등록되어 있어 해당 월로 이동합니다.`);
     return;
   }
   History.push();
