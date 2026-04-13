@@ -241,7 +241,10 @@ tr.exempt-tr td.nc { color: var(--muted) !important; text-decoration: line-throu
 <div class="page" id="page-monthly">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;">
     <div class="month-tabs" id="mo-tabs"></div>
-    <button class="btn-add admin-only" onclick="openAdd()">+ 직원 추가</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-add admin-only" onclick="openAddMonth()">+ 월 추가</button>
+      <button class="btn-add admin-only" onclick="openAdd()">+ 직원 추가</button>
+    </div>
   </div>
   <div class="kpi-row" id="mo-kpi"></div>
   <div class="card">
@@ -629,7 +632,11 @@ const History = {
 
   // 현재 상태 스냅샷 (깊은 복사)
   snapshot() {
+    ensureMonthStructures();
     return JSON.parse(JSON.stringify({
+      currentMonth:  S.currentMonth,
+      monthKeys:     S.monthKeys,
+      monthLabels:   S.monthLabels,
       persons:       S.persons,
       monthly:       S.monthly,
       annual2026:    S.annual2026,
@@ -753,6 +760,34 @@ function barRow(label, value, maxVal, color) {
   </div>`;
 }
 
+function monthLabel(mk) {
+  return S.monthLabels[mk] || mk;
+}
+
+function compareMonthKey(a, b) {
+  const [ay, am] = String(a).split('.').map(Number);
+  const [by, bm] = String(b).split('.').map(Number);
+  return (ay - by) || (am - bm);
+}
+
+function ensureMonthStructures() {
+  const monthlyKeys = Object.keys(S.monthly || {});
+  const mergedKeys = new Set([...(S.monthKeys || []), ...monthlyKeys]);
+  S.monthKeys = [...mergedKeys].sort(compareMonthKey);
+  if (!S.monthLabels) S.monthLabels = {};
+  S.monthKeys.forEach(mk => {
+    const [year, month] = mk.split('.');
+    if (!S.monthLabels[mk] && year && month) {
+      S.monthLabels[mk] = `${year}년 ${Number(month)}월`;
+    }
+    if (!S.monthly[mk]) S.monthly[mk] = {};
+    S.allPersons.forEach(name => S.getM(mk, name));
+  });
+  if (!S.monthKeys.includes(S.currentMonth)) {
+    S.currentMonth = S.monthKeys[S.monthKeys.length - 1] || S.currentMonth;
+  }
+}
+
 // ═══════════════════════════════════════
 // INLINE EDIT
 // ═══════════════════════════════════════
@@ -814,6 +849,7 @@ function editTextTd(td, val, onChange) {
 // OVERVIEW
 // ═══════════════════════════════════════
 function renderOverview() {
+  ensureMonthStructures();
   const mk = S.currentMonth;
   const mdata = S.monthly[mk]||{};
   const all = S.allPersons;
@@ -877,8 +913,9 @@ function renderOverview() {
 // MONTHLY
 // ═══════════════════════════════════════
 function renderMonthly() {
+  ensureMonthStructures();
   document.getElementById('mo-tabs').innerHTML = S.monthKeys.map(mk=>
-    `<div class="month-btn${mk===S.currentMonth?' active':''}" onclick="setMonth('${mk}')">${S.monthLabels[mk]}</div>`
+    `<div class="month-btn${mk===S.currentMonth?' active':''}" onclick="setMonth('${mk}')">${monthLabel(mk)}</div>`
   ).join('');
 
   const mk = S.currentMonth;
@@ -918,6 +955,32 @@ function renderMonthly() {
 function setMonth(mk) {
   S.currentMonth = mk;
   renderAll();
+}
+
+function openAddMonth() {
+  if (!isAdmin()) return;
+  const input = prompt('추가할 월을 입력하세요. 예: 2026.05');
+  if (!input) return;
+  const mk = input.trim();
+  if (!/^\d{4}\.(0[1-9]|1[0-2])$/.test(mk)) {
+    toast('❌ 월 형식은 YYYY.MM 이어야 합니다.');
+    return;
+  }
+  if (S.monthKeys.includes(mk)) {
+    setMonth(mk);
+    toast('이미 등록된 월입니다.');
+    return;
+  }
+  History.push();
+  S.monthKeys.push(mk);
+  S.monthKeys.sort(compareMonthKey);
+  const [year, month] = mk.split('.');
+  S.monthLabels[mk] = `${year}년 ${Number(month)}월`;
+  S.monthly[mk] = {};
+  S.allPersons.forEach(name => S.getM(mk, name));
+  S.currentMonth = mk;
+  renderAll();
+  toast(`✓ ${monthLabel(mk)} 추가됨`);
 }
 
 // ═══════════════════════════════════════
@@ -1052,6 +1115,7 @@ function toggleExempt(name) {
 // ANNUAL
 // ═══════════════════════════════════════
 function renderAnnual() {
+  ensureMonthStructures();
   const months=[1,2,3,4,5,6,7,8,9,10,11,12];
   const mN=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const all=S.persons;
@@ -1110,6 +1174,7 @@ function renderAnnual() {
 // PERSONS
 // ═══════════════════════════════════════
 function renderPersons() {
+  ensureMonthStructures();
   const mk=S.currentMonth;
   document.getElementById('pg-grid').innerHTML = S.allPersons.map(name=>{
     const m=S.getM(mk,name);
@@ -1141,6 +1206,7 @@ function renderPersons() {
 // MANAGE
 // ═══════════════════════════════════════
 function renderManage() {
+  ensureMonthStructures();
   const tbody=document.getElementById('mg-tbody');
   tbody.innerHTML='';
   S.allPersons.forEach((name,i)=>{
@@ -1236,7 +1302,11 @@ const LS_KEY = 'wm_dashboard_v1';
 
 function saveToLocalStorage() {
   try {
+    ensureMonthStructures();
     const data = {
+      currentMonth: S.currentMonth,
+      monthKeys: S.monthKeys,
+      monthLabels: S.monthLabels,
       persons: S.persons,
       monthly: S.monthly,
       annual2026: S.annual2026,
@@ -1261,12 +1331,16 @@ function loadFromLocalStorage() {
 }
 
 function applyImportedData(data) {
+  if (data.currentMonth) S.currentMonth = data.currentMonth;
+  if (data.monthKeys)    S.monthKeys = data.monthKeys;
+  if (data.monthLabels)  S.monthLabels = data.monthLabels;
   if (data.persons)      S.persons      = data.persons;
   if (data.monthly)      S.monthly      = data.monthly;
   if (data.annual2026)   S.annual2026   = data.annual2026;
   if (data.annual2025)   S.annual2025   = data.annual2025;
   if (data.weekend)      S.weekend      = data.weekend;
   S.weekendExempt = data.weekendExempt ? new Set(data.weekendExempt) : new Set();
+  ensureMonthStructures();
 }
 
 function clearLocalStorage() {
@@ -1308,6 +1382,7 @@ function closeExportModal() { document.getElementById('exportModal').style.displ
 // ─────────────────────────────────────
 async function saveAsHTML() {
   toast('⏳ HTML 생성 중...');
+  ensureMonthStructures();
 
   // 원본 소스를 fetch로 가져옴 (outerHTML은 DOM 파싱으로 변형될 수 있음)
   let originalHTML;
@@ -1325,11 +1400,22 @@ async function saveAsHTML() {
     `weekendExempt: new Set(${JSON.stringify([...S.weekendExempt])})`
   );
 
+  newHTML = newHTML.replace(
+    /currentMonth:\s*'[^']*'/,
+    `currentMonth: '${S.currentMonth}'`
+  );
+
   // persons 배열 교체
   newHTML = replaceDataBlock(newHTML, 'persons', JSON.stringify(S.persons));
 
   // monthly 객체 교체
   newHTML = replaceDataBlock(newHTML, 'monthly', JSON.stringify(S.monthly));
+
+  // monthKeys 배열 교체
+  newHTML = replaceDataBlock(newHTML, 'monthKeys', JSON.stringify(S.monthKeys));
+
+  // monthLabels 객체 교체
+  newHTML = replaceDataBlock(newHTML, 'monthLabels', JSON.stringify(S.monthLabels));
 
   // annual2026 교체
   newHTML = replaceDataBlock(newHTML, 'annual2026', JSON.stringify(S.annual2026));
@@ -1398,7 +1484,11 @@ function replaceDataBlock(html, key, newValueStr) {
 
 // ── JSON 내보내기 ──
 function exportJSON() {
+  ensureMonthStructures();
   const data = {
+    currentMonth: S.currentMonth,
+    monthKeys: S.monthKeys,
+    monthLabels: S.monthLabels,
     persons: S.persons,
     monthly: S.monthly,
     annual2026: S.annual2026,
@@ -1654,7 +1744,11 @@ async function pushToGitHub() {
   btn.textContent = '⏳ 저장 중...';
 
   try {
+    ensureMonthStructures();
     const data = {
+      currentMonth: S.currentMonth,
+      monthKeys: S.monthKeys,
+      monthLabels: S.monthLabels,
       persons: S.persons,
       monthly: S.monthly,
       annual2026: S.annual2026,
