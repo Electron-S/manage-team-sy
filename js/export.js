@@ -25,40 +25,25 @@ async function saveAsHTML() {
     originalHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
   }
 
-  // weekendExempt: new Set([...]) 교체
-  let newHTML = originalHTML.replace(
-    /weekendExempt:\s*new Set\(\[[\s\S]*?\]\)/,
-    `weekendExempt: new Set(${JSON.stringify([...S.weekendExempt])})`
-  );
+  let newHTML = originalHTML;
 
   newHTML = newHTML.replace(
     /currentMonth:\s*'[^']*'/,
     `currentMonth: '${S.currentMonth}'`
   );
-
-  // persons 배열 교체
-  newHTML = replaceDataBlock(newHTML, 'persons', JSON.stringify(S.persons));
-
-  // monthly 객체 교체
-  newHTML = replaceDataBlock(newHTML, 'monthly', JSON.stringify(S.monthly));
-
-  // monthKeys 배열 교체
-  newHTML = replaceDataBlock(newHTML, 'monthKeys', JSON.stringify(S.monthKeys));
-
-  // monthLabels 객체 교체
-  newHTML = replaceDataBlock(newHTML, 'monthLabels', JSON.stringify(S.monthLabels));
-
-  // annualByYear 교체
+  newHTML = replaceDataBlock(newHTML, 'persons',      JSON.stringify(S.persons));
+  newHTML = replaceDataBlock(newHTML, 'monthly',      JSON.stringify(S.monthly));
+  newHTML = replaceDataBlock(newHTML, 'monthKeys',    JSON.stringify(S.monthKeys));
+  newHTML = replaceDataBlock(newHTML, 'monthLabels',  JSON.stringify(S.monthLabels));
   newHTML = replaceDataBlock(newHTML, 'annualByYear', JSON.stringify(S.annualByYear));
-
-  // annual2025 교체
-  newHTML = replaceDataBlock(newHTML, 'annual2025', JSON.stringify(S.annual2025));
-
-  // weekend 교체
-  newHTML = replaceDataBlock(newHTML, 'weekend', JSON.stringify(S.weekend));
-
-  // weekendDates 교체
+  newHTML = replaceDataBlock(newHTML, 'annual2025',   JSON.stringify(S.annual2025));
+  newHTML = replaceDataBlock(newHTML, 'weekend',      JSON.stringify(S.weekend));
   newHTML = replaceDataBlock(newHTML, 'weekendDates', JSON.stringify(S.weekendDates));
+  // weekendExempt는 new Set([...]) 형태라 replaceDataBlock 대신 정규식 사용 (마지막에 처리)
+  newHTML = newHTML.replace(
+    /weekendExempt:\s*new Set\(\[[\s\S]*?\]\)/,
+    `weekendExempt: new Set(${JSON.stringify([...S.weekendExempt])})`
+  );
 
   // 파일명: 날짜+시간
   const now = new Date();
