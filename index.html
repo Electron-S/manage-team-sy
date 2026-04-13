@@ -599,10 +599,7 @@ const S = {
   wkCount(name) {
     return Object.values(this.getW(name).dates).reduce((s,v)=>s+(v==='종일'?1:v==='반일'?0.5:0),0);
   },
-  wkRate(name) {
-    const base = (this.weekendDates || []).length || 1;
-    return this.wkCount(name) / base;
-  },
+  wkRate(name) { return this.wkCount(name) / 24; },
   isExempt(name) { return this.weekendExempt.has(name); },
   toggleExempt(name) {
     if (this.weekendExempt.has(name)) this.weekendExempt.delete(name);
