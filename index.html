@@ -1820,6 +1820,19 @@ document.addEventListener('keydown', e => {
 // INIT — HTTP이면 data.json 우선 로드, 아니면 localStorage 복원
 // ═══════════════════════════════════════
 (async () => {
+  const savedAt = loadFromLocalStorage();
+  if (savedAt) {
+    const dt = new Date(savedAt);
+    const fmt = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('savedBadge').textContent = `✓ 복원됨 (${fmt})`;
+    document.getElementById('savedBadge').style.opacity = '1';
+    setTimeout(() => document.getElementById('savedBadge').style.opacity = '0', 3000);
+    updateAdminUI();
+    History.updateButtons();
+    renderOverview();
+    return;
+  }
+
   if (location.protocol.startsWith('http')) {
     try {
       const res = await fetch('data.json?t=' + Date.now());
@@ -1832,14 +1845,6 @@ document.addEventListener('keydown', e => {
         return;
       }
     } catch(e) {}
-  }
-  const savedAt = loadFromLocalStorage();
-  if (savedAt) {
-    const dt = new Date(savedAt);
-    const fmt = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-    document.getElementById('savedBadge').textContent = `✓ 복원됨 (${fmt})`;
-    document.getElementById('savedBadge').style.opacity = '1';
-    setTimeout(() => document.getElementById('savedBadge').style.opacity = '0', 3000);
   }
   updateAdminUI();
   History.updateButtons();
