@@ -899,7 +899,7 @@ function renderOverview() {
       <td>${exempt ? `<span class="exempt-badge">면제</span>` : `<span style="color:${rc};font-family:'JetBrains Mono',monospace;font-weight:700;">${(rate*100).toFixed(1)}%</span>`}</td>
       <td>${exempt ? '—' : `<span class="tag t-blue">${cnt}</span>`}</td>
       <td></td>
-      <td><button class="btn-del" onclick="openDelete('${name}')">삭제</button></td>
+      <td>${isAdmin()?`<button class="btn-del" onclick="openDelete('${name}')">삭제</button>`:''}</td>
     `;
     editNumTd(tr.cells[1], m.vacation, v=>{ m.vacation=v; });
     editNumTdBlue(tr.cells[2], m.overtime, v=>{ m.overtime=v; });
@@ -940,7 +940,7 @@ function renderMonthly() {
   all.forEach(name => {
     const r = S.getM(mk, name);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="nc">${name}</td><td></td><td></td><td></td><td></td><td><button class="btn-del" onclick="openDelete('${name}')">삭제</button></td>`;
+    tr.innerHTML = `<td class="nc">${name}</td><td></td><td></td><td></td><td></td><td>${isAdmin()?`<button class="btn-del" onclick="openDelete('${name}')">삭제</button>`:''}</td>`;
     editNumTd(tr.cells[1], r.vacation, v=>{ r.vacation=v; });
     editNumTdBlue(tr.cells[2], r.overtime, v=>{ r.overtime=v; });
     editNumTdBlue(tr.cells[3], r.weekend, v=>{ r.weekend=v; });
