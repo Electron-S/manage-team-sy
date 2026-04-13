@@ -997,7 +997,13 @@ function openAddMonth() {
   S.monthly[mk] = {};
   S.allPersons.forEach(name => S.getM(mk, name));
   S.currentMonth = mk;
-  renderAll();
+  curPage = 'monthly';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-monthly').classList.add('active');
+  document.querySelector('.nav-tab[data-page="monthly"]').classList.add('active');
+  renderPage(curPage);
+  notifySaved();
   toast(`✓ ${monthLabel(mk)} 추가됨`);
 }
 
