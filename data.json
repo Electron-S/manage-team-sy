@@ -1,5 +1,5 @@
 {
-  "currentMonth": "2026.04",
+  "currentMonth": "2026.05",
   "monthKeys": [
     "2026.01",
     "2026.02",
@@ -205,43 +205,43 @@
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "5/4"
       },
       "진영옥": {
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "5/4"
       },
       "정희진": {
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "5/4"
       },
       "정혜라": {
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "5/4"
       },
       "신선경": {
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "5/4"
       },
       "김혜원": {
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "5/4"
       },
       "방지영": {
         "vacation": 0,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "휴가예정 5/4,6,7,8,11"
       }
     }
   },
@@ -499,6 +499,6 @@
     "남현정",
     "진영옥"
   ],
-  "savedAt": "2026-04-24T05:29:38.757Z",
+  "savedAt": "2026-04-24T05:30:17.944Z",
   "version": "1.0"
 }
