@@ -272,16 +272,16 @@
         "note": ""
       },
       "신선경": {
-        "vacation": 0,
+        "vacation": 1,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "6/11 휴가"
       },
       "김혜원": {
-        "vacation": 0,
+        "vacation": 0.5,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "6/10 반차"
       },
       "방지영": {
         "vacation": 0,
@@ -599,6 +599,6 @@
     "남현정",
     "진영옥"
   ],
-  "savedAt": "2026-06-11T04:48:39.612Z",
+  "savedAt": "2026-06-11T04:49:07.340Z",
   "version": "1.0"
 }
