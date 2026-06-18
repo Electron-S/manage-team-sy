@@ -248,10 +248,10 @@
     },
     "2026.06": {
       "남현정": {
-        "vacation": 0,
+        "vacation": 0.5,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "6/19"
       },
       "진영옥": {
         "vacation": 0,
@@ -266,10 +266,10 @@
         "note": ""
       },
       "정혜라": {
-        "vacation": 0,
+        "vacation": 0.5,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "6/17 오전반차"
       },
       "신선경": {
         "vacation": 1,
@@ -606,6 +606,6 @@
     "남현정",
     "진영옥"
   ],
-  "savedAt": "2026-06-14T22:57:58.578Z",
+  "savedAt": "2026-06-18T01:07:29.470Z",
   "version": "1.0"
 }
