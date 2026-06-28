@@ -1,5 +1,5 @@
 {
-  "currentMonth": "2026.02",
+  "currentMonth": "2026.03",
   "monthKeys": [
     "2026.01",
     "2026.02",
@@ -74,16 +74,16 @@
     },
     "2026.03": {
       "남현정": {
-        "vacation": 0,
+        "vacation": 1,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "3/30권장휴무"
       },
       "진영옥": {
-        "vacation": 0,
+        "vacation": 1,
         "overtime": 0,
         "weekend": 0,
-        "note": ""
+        "note": "3/30권장휴무"
       },
       "정혜라": {
         "vacation": 0,
@@ -674,6 +674,6 @@
     "남현정",
     "진영옥"
   ],
-  "savedAt": "2026-06-28T23:02:29.784Z",
+  "savedAt": "2026-06-28T23:02:56.153Z",
   "version": "1.0"
 }
